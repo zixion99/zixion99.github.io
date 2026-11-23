@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A simple weekly planner for personal, study, and work tasks.">
+  <title>Weekly Task Planner</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <main class="planner" aria-labelledby="page-title">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">A little structure for your week</p>
+        <h1 id="page-title">Weekly Task Planner</h1>
+      </div>
+      <div class="progress" aria-label="Progress across all tasks" aria-live="polite">
+        <span class="progress-label">All tasks</span>
+        <span class="counter"><span class="counter-icon" aria-hidden="true">✓</span> Completed <strong id="completed-count">0</strong></span>
+        <span class="counter">Incomplete <strong id="incomplete-count">0</strong></span>
+      </div>
+    </header>
+
+    <p id="app-error" class="error-banner" role="alert" hidden></p>
+    <p id="loading" role="status">Opening your planner…</p>
+    <section id="planner-content" hidden aria-label="Task planner">
+      <div class="toolbar">
+        <div class="week-navigation" aria-label="Week navigation">
+          <button id="previous-week" type="button">Previous week</button>
+          <h2 id="week-label"></h2>
+          <button id="next-week" type="button">Next week</button>
+        </div>
+        <button id="add-task" class="primary" type="button"><span aria-hidden="true">＋</span> Add task</button>
+      </div>
+
+      <div class="filter-bar">
+        <div class="filters" role="group" aria-label="Filter tasks">
+          <button type="button" data-filter="All" aria-pressed="true">All</button>
+          <button type="button" data-filter="Today" aria-pressed="false">Today</button>
+          <button type="button" data-filter="Completed" aria-pressed="false">Completed</button>
+          <button type="button" data-filter="Overdue" aria-pressed="false">Overdue</button>
+        </div>
+        <p id="view-description">Your week, day by day</p>
+      </div>
+
+      <div id="task-list" aria-live="polite" aria-atomic="false"></div>
+    </section>
+    <footer class="page-footer"><span>Personal · Study · Work</span><span>Saved in this browser</span></footer>
+  </main>
+
+  <dialog id="task-dialog" aria-labelledby="dialog-title">
+    <form id="task-form" novalidate>
+      <div class="dialog-heading">
+        <p class="eyebrow">Make room for what matters</p>
+        <h2 id="dialog-title">Add task</h2>
+      </div>
+      <p id="form-error" class="error-banner" role="alert" hidden></p>
+      <div class="field">
+        <label for="title">Title <span aria-hidden="true">*</span></label>
+        <input id="title" name="title" type="text" placeholder="Enter a task title" required aria-describedby="title-error">
+        <p id="title-error" class="field-error" hidden></p>
+      </div>
+      <div class="field">
+        <label for="due-date">Due date <span aria-hidden="true">*</span></label>
+        <input id="due-date" name="dueDate" type="date" required aria-describedby="dueDate-error">
+        <p id="dueDate-error" class="field-error" hidden></p>
+      </div>
+      <div class="field">
+        <label for="priority">Priority <span aria-hidden="true">*</span></label>
+        <select id="priority" name="priority" required aria-describedby="priority-error">
+          <option value="">Select priority</option>
+          <option value="High">High</option>
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
+        </select>
+        <p id="priority-error" class="field-error" hidden></p>
+      </div>
+      <div class="field">
+        <label for="category">Category <span aria-hidden="true">*</span></label>
+        <select id="category" name="categoryId" required aria-describedby="categoryId-error">
+          <option value="">Select category</option>
+        </select>
+        <p id="categoryId-error" class="field-error" hidden></p>
+      </div>
+      <p class="required-note">* Required fields</p>
+      <div class="dialog-actions">
+        <button id="cancel-task" type="button">Cancel</button>
+        <button id="save-task" class="primary" type="submit">Save task</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="save-message" class="toast" role="status" hidden>
+    <span id="save-message-text"></span>
+    <button id="close-message" type="button" aria-label="Dismiss save message">×</button>
+  </div>
+</body>
+</html>
