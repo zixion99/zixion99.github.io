@@ -56,11 +56,10 @@ export class Week {
   contains(date) { return date >= dateKey(this.start) && date <= dateKey(this.end()); }
 }
 
-/** Quick date navigation starts at the chosen date and stops on its Sunday. */
+/** Seven selectable dates: the starting date and the following six days. */
 export function dateNavigationRange(value) {
   const date = parseDate(value);
-  // This shortcut deliberately differs from the Sunday–Saturday weekly view.
-  return date ? { first: value, last: dateKey(shiftDate(date, (7 - date.getDay()) % 7)) } : null;
+  return date ? { first: value, last: dateKey(shiftDate(date, 6)) } : null;
 }
 
 export class Task {
@@ -337,9 +336,6 @@ export class TaskFormDialog {
     const usable = date && this.dateRange && !field.disabled;
     this.previousDay.disabled = !usable || field.value <= this.dateRange.first;
     this.nextDay.disabled = !usable || field.value >= this.dateRange.last;
-    document.getElementById('due-date-label').textContent = date
-      ? `${new Intl.DateTimeFormat('en-GB', { weekday: 'long' }).format(date)} · Arrows stop on Sunday`
-      : 'Choose a date to use the day arrows.';
   }
   moveDate(direction) {
     const field = this.form.elements.dueDate;
