@@ -333,6 +333,9 @@ export class TaskFormDialog {
   updateDateNavigation() {
     const field = this.form.elements.dueDate;
     const date = parseDate(field.value);
+    document.getElementById('due-weekday').textContent = date
+      ? new Intl.DateTimeFormat('en-GB', { weekday: 'long' }).format(date)
+      : '';
     const usable = date && this.dateRange && !field.disabled;
     this.previousDay.disabled = !usable || field.value <= this.dateRange.first;
     this.nextDay.disabled = !usable || field.value >= this.dateRange.last;

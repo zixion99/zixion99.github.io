@@ -160,6 +160,7 @@ select { appearance: none; padding-right: 32px; background-image: url("data:imag
 .date-navigation { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; gap: 8px; }
 .date-navigation button { padding: 0; font-size: 1.5rem; line-height: 1; }
 .date-navigation input { min-width: 0; }
+.date-weekday { margin-left: 10px; font-weight: 400; }
 :root[data-theme="dark"] select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23b0c2b6' stroke-width='1.5'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E"); }
 @media (max-width: 720px) {
   .header-tools { align-items: flex-start; }
