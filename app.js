@@ -56,6 +56,13 @@ export class Week {
   contains(date) { return date >= dateKey(this.start) && date <= dateKey(this.end()); }
 }
 
+/** Quick date navigation starts at the chosen date and stops on its Sunday. */
+export function dateNavigationRange(value) {
+  const date = parseDate(value);
+  // This shortcut deliberately differs from the Sunday–Saturday weekly view.
+  return date ? { first: value, last: dateKey(shiftDate(date, (7 - date.getDay()) % 7)) } : null;
+}
+
 export class Task {
   constructor(record) { Object.assign(this, record); }
   isComplete() { return this.status === TaskStatus.COMPLETE; }
@@ -295,6 +302,13 @@ export class TaskFormDialog {
     this.dialog = document.getElementById('task-dialog');
     this.form = document.getElementById('task-form');
     this.editingId = null;
+    this.dateRange = null;
+    this.previousDay = document.getElementById('previous-day');
+    this.nextDay = document.getElementById('next-day');
+    this.previousDay.addEventListener('click', () => this.moveDate(-1));
+    this.nextDay.addEventListener('click', () => this.moveDate(1));
+    // Manual date selection remains unrestricted, including past dates (A-05).
+    this.form.elements.dueDate.addEventListener('input', () => this.resetDateNavigation());
   }
   setCategories(categories) {
     const select = this.form.elements.categoryId;
@@ -309,7 +323,32 @@ export class TaskFormDialog {
     document.getElementById('dialog-title').textContent = task ? 'Edit task' : 'Add task';
     document.getElementById('save-task').textContent = task ? 'Save changes' : 'Save task';
     if (task) for (const key of ['title', 'dueDate', 'priority', 'categoryId']) this.form.elements[key].value = task[key];
+    else this.form.elements.dueDate.value = dateKey();
+    this.resetDateNavigation();
     this.dialog.showModal(); this.form.elements.title.focus();
+  }
+  resetDateNavigation() {
+    this.dateRange = dateNavigationRange(this.form.elements.dueDate.value);
+    this.updateDateNavigation();
+  }
+  updateDateNavigation() {
+    const field = this.form.elements.dueDate;
+    const date = parseDate(field.value);
+    const usable = date && this.dateRange && !field.disabled;
+    this.previousDay.disabled = !usable || field.value <= this.dateRange.first;
+    this.nextDay.disabled = !usable || field.value >= this.dateRange.last;
+    document.getElementById('due-date-label').textContent = date
+      ? `${new Intl.DateTimeFormat('en-GB', { weekday: 'long' }).format(date)} · Arrows stop on Sunday`
+      : 'Choose a date to use the day arrows.';
+  }
+  moveDate(direction) {
+    const field = this.form.elements.dueDate;
+    const current = parseDate(field.value);
+    if (!current || !this.dateRange || field.disabled) return;
+    const next = dateKey(shiftDate(current, direction));
+    if (next < this.dateRange.first || next > this.dateRange.last) return;
+    field.value = next;
+    this.updateDateNavigation();
   }
   readInput() {
     const fields = this.form.elements;
@@ -372,6 +411,7 @@ export class PlannerController {
   setBusy(busy) {
     this.busy = busy;
     document.querySelectorAll('#planner-content button, #planner-content input, #task-form button, #task-form input, #task-form select').forEach(control => { control.disabled = busy; });
+    this.form.updateDateNavigation();
   }
   /** Serialize actions so double clicks cannot duplicate a save or race a redraw. */
   async perform(action) {
@@ -455,6 +495,16 @@ export class PlannerController {
 
 // The guard lets Node's built-in test runner import pure domain classes.
 if (typeof document !== 'undefined') {
+  // Appearance is independent of task storage and still works if storage fails.
+  const themeToggle = document.getElementById('theme-toggle');
+  const updateThemeButton = () => themeToggle.setAttribute('aria-pressed', String(document.documentElement.dataset.theme === 'dark'));
+  updateThemeButton();
+  themeToggle.addEventListener('click', () => {
+    const theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = theme;
+    updateThemeButton();
+    try { localStorage.setItem('weekly-planner-theme', theme); } catch { /* The toggle still works for this visit. */ }
+  });
   const view = new PlannerView();
   const controller = new PlannerController(new TaskService(new PlannerDatabase()), view, new TaskFormDialog());
   controller.init().catch(error => {
